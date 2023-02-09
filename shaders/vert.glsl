@@ -1,8 +1,9 @@
 #version 420
-in vec2 pos;
-out vec4 pos_frag;
+
+in vec4 pos;
+out vec2 uv;
 
 void main() {
-  pos_frag = vec4(pos, vec2(1.));
-  gl_Position = pos_frag;
+  gl_Position = pos;
+  uv = (pos.xy + 1) * 0.5;
 }
