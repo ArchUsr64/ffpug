@@ -38,5 +38,5 @@ void main() {
 		result += color_to_float(uvec2(j, my_index), input_data)
 			* color_to_float(uvec2(j, my_index), weights);
 	}
-	out_color = vec4(result/10);
+	out_color = vec4(result / 10);
 }

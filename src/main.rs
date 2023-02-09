@@ -15,16 +15,15 @@ fn verify() -> Vec<f32> {
 	(0..(TEST_MATRIX.len() / TEST_INPUT.len()))
 		.map(|i| {
 			(0..TEST_INPUT.len())
-				.map(|j| TEST_INPUT[j] * TEST_MATRIX[i * 10 + j])
+				.map(|j| TEST_INPUT[j] * TEST_MATRIX[i * TEST_INPUT.len() + j])
 				.sum()
 		})
 		.collect()
 }
 
 #[allow(clippy::excessive_precision)]
-const TEST_INPUT: [f32; 10] = [
+const TEST_INPUT: [f32; 16] = [
 	0.08822412071490415,
-	0.6838678089284516,
 	0.19363814098049603,
 	0.4671973140208562,
 	0.6046823830357189,
@@ -32,11 +31,18 @@ const TEST_INPUT: [f32; 10] = [
 	0.11242470296348483,
 	0.9610872514505454,
 	0.866937611907573,
+	0.08822412071490415,
+	0.6838678089284516,
+	0.19363814098049603,
+	0.4671973140208562,
+	0.6046823830357189,
+	0.3504339708582983,
+	0.11242470296348483,
 	0.9133379199459934,
 ];
 
 #[allow(clippy::excessive_precision)]
-const TEST_MATRIX: [f32; 50] = [
+const TEST_MATRIX: [f32; 64] = [
 	0.08822412071490415,
 	0.4279725868729074,
 	0.3858888181523724,
@@ -60,7 +66,21 @@ const TEST_MATRIX: [f32; 50] = [
 	0.6263231852174785,
 	0.6017543004252598,
 	0.453683483584456,
-	0.7070404366194183,
+	0.4279725868729074,
+	0.3858888181523724,
+	0.42543534515580705,
+	0.3733061621359317,
+	0.08003915241373138,
+	0.6838678089284516,
+	0.6351788270245093,
+	0.09029006806890472,
+	0.4711211727115543,
+	0.14455617997093462,
+	0.8857592877215551,
+	0.19363814098049603,
+	0.4671973140208562,
+	0.7816316283967847,
+	0.5544995005161097,
 	0.7351642433952214,
 	0.37382023409928067,
 	0.3534232594670118,
@@ -116,8 +136,8 @@ impl Stage {
 			ctx,
 			&pixels,
 			TextureParams {
-				width: 10,
-				height: 5,
+				width: TEST_INPUT.len() as _,
+				height: (TEST_MATRIX.len()/TEST_INPUT.len()) as _,
 				filter: FilterMode::Nearest,
 				..TextureParams::default()
 			},
@@ -132,7 +152,7 @@ impl Stage {
 			ctx,
 			&pixels,
 			TextureParams {
-				width: 10,
+				width: TEST_INPUT.len() as _,
 				height: 1,
 				filter: FilterMode::Nearest,
 				..TextureParams::default()
@@ -182,8 +202,8 @@ impl EventHandler for Stage {
 		ctx.apply_pipeline(&self.pipeline);
 		ctx.apply_bindings(&self.bindings);
 		ctx.apply_uniforms(&Uniform {
-			input_neuron_count: 10,
-			output_neuron_count: 5,
+				input_neuron_count: TEST_INPUT.len() as _,
+				output_neuron_count: (TEST_MATRIX.len()/TEST_INPUT.len()) as _,
 		});
 		ctx.draw(0, 6, 1);
 		ctx.end_render_pass();
