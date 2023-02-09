@@ -11,8 +11,79 @@ fn float_to_4_u8s(data: f32) -> Vec<u8> {
 		.collect()
 }
 
+#[allow(clippy::excessive_precision)]
+const TEST_INPUT: [f32; 10] = [
+	0.08822412071490415,
+	0.6838678089284516,
+	0.19363814098049603,
+	0.4671973140208562,
+	0.6046823830357189,
+	0.3504339708582983,
+	0.11242470296348483,
+	0.9610872514505454,
+	0.866937611907573,
+	0.9133379199459934,
+];
+
+#[allow(clippy::excessive_precision)]
+const TEST_MATRIX: [f32; 50] = [
+	0.08822412071490415,
+	0.4279725868729074,
+	0.3858888181523724,
+	0.42543534515580705,
+	0.3733061621359317,
+	0.08003915241373138,
+	0.6838678089284516,
+	0.6351788270245093,
+	0.09029006806890472,
+	0.4711211727115543,
+	0.14455617997093462,
+	0.8857592877215551,
+	0.19363814098049603,
+	0.4671973140208562,
+	0.7816316283967847,
+	0.5544995005161097,
+	0.5202063451800572,
+	0.09182578265329489,
+	0.31537650192800437,
+	0.3004754865902629,
+	0.6263231852174785,
+	0.6017543004252598,
+	0.453683483584456,
+	0.7070404366194183,
+	0.7351642433952214,
+	0.37382023409928067,
+	0.3534232594670118,
+	0.7507014747787965,
+	0.5131125669181578,
+	0.6499617065018768,
+	0.1707236320124339,
+	0.6838678089284516,
+	0.6351788270245093,
+	0.09029006806890472,
+	0.4711211727115543,
+	0.14455617997093462,
+	0.8857592877215551,
+	0.3811522342570507,
+	0.7092751335472234,
+	0.48838757841796465,
+	0.09919861095497307,
+	0.4757039943579817,
+	0.9762177754226935,
+	0.4248474731773134,
+	0.6046823830357189,
+	0.3504339708582983,
+	0.11242470296348483,
+	0.9610872514505454,
+	0.866937611907573,
+	0.9133379199459934,
+];
+
 #[repr(C)]
-struct Uniform(f32);
+struct Uniform {
+	neuron_count: (u32, u32),
+	window_size: (f32, f32),
+}
 
 struct Stage {
 	pipeline: Pipeline,
@@ -26,10 +97,42 @@ impl Stage {
 		let indices: [u16; 6] = [0, 1, 2, 0, 2, 3];
 		let index_buffer = Buffer::immutable::<u16>(ctx, BufferType::IndexBuffer, &indices);
 
+		let mut pixels = Vec::<u8>::new();
+		TEST_MATRIX.map(|x| {
+			let parts = float_to_4_u8s(x);
+			parts.iter().for_each(|x| pixels.push(*x))
+		});
+		let test_matrix = Texture::from_data_and_format(
+			ctx,
+			&pixels,
+			TextureParams {
+				width: 10,
+				height: 5,
+				filter: FilterMode::Nearest,
+				..TextureParams::default()
+			},
+		);
+
+		let mut pixels = Vec::<u8>::new();
+		TEST_INPUT.map(|x| {
+			let parts = float_to_4_u8s(x);
+			parts.iter().for_each(|x| pixels.push(*x))
+		});
+		let test_input = Texture::from_data_and_format(
+			ctx,
+			&pixels,
+			TextureParams {
+				width: 10,
+				height: 1,
+				filter: FilterMode::Nearest,
+				..TextureParams::default()
+			},
+		);
+
 		let bindings = Bindings {
 			vertex_buffers: vec![vertex_buffer],
 			index_buffer,
-			images: vec![],
+			images: vec![test_input, test_matrix],
 		};
 
 		use std::fs;
@@ -38,9 +141,12 @@ impl Stage {
 			&fs::read_to_string("shaders/vert.glsl").unwrap(),
 			&fs::read_to_string("shaders/frag.glsl").unwrap(),
 			ShaderMeta {
-				images: vec![],
+				images: vec!["input_data".to_string(), "weights".to_string()],
 				uniforms: UniformBlockLayout {
-					uniforms: vec![UniformDesc::new("some_float", UniformType::Float1)],
+					uniforms: vec![
+						UniformDesc::new("neuron_count", UniformType::Int2),
+						UniformDesc::new("window_size", UniformType::Float2),
+					],
 				},
 			},
 		)
@@ -61,20 +167,14 @@ impl EventHandler for Stage {
 	fn update(&mut self, _ctx: &mut Context) {}
 
 	fn draw(&mut self, ctx: &mut Context) {
-		static mut T: f32 = 0.;
-		unsafe {
-			T += 0.01;
-			if T >= 1. {
-				T = 0.
-			}
-		}
 		ctx.begin_default_pass(Default::default());
 
 		ctx.apply_pipeline(&self.pipeline);
 		ctx.apply_bindings(&self.bindings);
-		unsafe {
-			ctx.apply_uniforms(&Uniform(T));
-		};
+		ctx.apply_uniforms(&Uniform {
+			neuron_count: (10, 5),
+			window_size: ctx.screen_size(),
+		});
 		ctx.draw(0, 6, 1);
 		ctx.end_render_pass();
 
