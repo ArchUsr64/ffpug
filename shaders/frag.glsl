@@ -3,6 +3,9 @@
 in vec2 uv;
 out vec4 out_color;
 
+uniform int input_neuron_count;
+uniform int output_neuron_count;
+
 uniform sampler2D input_data;
 uniform sampler2D weights;
 uniform uvec2 neuron_count;
