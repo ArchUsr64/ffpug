@@ -11,6 +11,16 @@ fn float_to_4_u8s(data: f32) -> Vec<u8> {
 		.collect()
 }
 
+fn verify() -> Vec<f32> {
+	(0..(TEST_MATRIX.len() / TEST_INPUT.len()))
+		.map(|i| {
+			(0..TEST_INPUT.len())
+				.map(|j| TEST_INPUT[j] * TEST_MATRIX[i * 10 + j])
+				.sum()
+		})
+		.collect()
+}
+
 #[allow(clippy::excessive_precision)]
 const TEST_INPUT: [f32; 10] = [
 	0.08822412071490415,
@@ -183,5 +193,6 @@ impl EventHandler for Stage {
 }
 
 fn main() {
+	println!("{:?}", verify());
 	miniquad::start(conf::Conf::default(), |ctx| Box::new(Stage::new(ctx)));
 }
