@@ -3,6 +3,14 @@ use miniquad::*;
 #[repr(C)]
 struct Vec2(f32, f32);
 
+fn float_to_4_u8s(data: f32) -> Vec<u8> {
+	let data = data.to_bits();
+	(0..4)
+		.map(|i| ((data >> (8 * i)) % 256) as u8)
+		.rev()
+		.collect()
+}
+
 #[repr(C)]
 struct Uniform(f32);
 
