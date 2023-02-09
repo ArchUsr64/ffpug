@@ -81,8 +81,6 @@ const TEST_MATRIX: [f32; 50] = [
 
 #[repr(C)]
 struct Uniform {
-	neuron_count: (u32, u32),
-	window_size: (f32, f32),
 	input_neuron_count: u32,
 	output_neuron_count: u32,
 }
@@ -146,8 +144,6 @@ impl Stage {
 				images: vec!["input_data".to_string(), "weights".to_string()],
 				uniforms: UniformBlockLayout {
 					uniforms: vec![
-						UniformDesc::new("neuron_count", UniformType::Int2),
-						UniformDesc::new("window_size", UniformType::Float2),
 						UniformDesc::new("input_neuron_count", UniformType::Int1),
 						UniformDesc::new("output_neuron_count", UniformType::Int1),
 					],
@@ -176,8 +172,6 @@ impl EventHandler for Stage {
 		ctx.apply_pipeline(&self.pipeline);
 		ctx.apply_bindings(&self.bindings);
 		ctx.apply_uniforms(&Uniform {
-			neuron_count: (10, 5),
-			window_size: ctx.screen_size(),
 			input_neuron_count: 10,
 			output_neuron_count: 5,
 		});
