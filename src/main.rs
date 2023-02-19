@@ -1,4 +1,5 @@
 use miniquad::*;
+mod matrix;
 
 #[repr(C)]
 struct Vec2(f32, f32);
@@ -137,7 +138,7 @@ impl Stage {
 			&pixels,
 			TextureParams {
 				width: TEST_INPUT.len() as _,
-				height: (TEST_MATRIX.len()/TEST_INPUT.len()) as _,
+				height: (TEST_MATRIX.len() / TEST_INPUT.len()) as _,
 				filter: FilterMode::Nearest,
 				..TextureParams::default()
 			},
@@ -202,8 +203,8 @@ impl EventHandler for Stage {
 		ctx.apply_pipeline(&self.pipeline);
 		ctx.apply_bindings(&self.bindings);
 		ctx.apply_uniforms(&Uniform {
-				input_neuron_count: TEST_INPUT.len() as _,
-				output_neuron_count: (TEST_MATRIX.len()/TEST_INPUT.len()) as _,
+			input_neuron_count: TEST_INPUT.len() as _,
+			output_neuron_count: (TEST_MATRIX.len() / TEST_INPUT.len()) as _,
 		});
 		ctx.draw(0, 6, 1);
 		ctx.end_render_pass();
